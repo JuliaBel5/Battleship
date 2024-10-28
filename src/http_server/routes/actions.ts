@@ -1,36 +1,11 @@
+import { players, rooms, RoomUser, winners } from "../utils/dataBase";
 import { sendError } from "../utils/sendError";
+import { Winner } from "../utils/types";
 import { wsServer } from "../wsServer";
+import { WebSocket } from "ws";
 
-// Определяем интерфейсы для игроков и комнат
-interface Player {
-  name: string;
-  password: string;
-  wins: number;
-  ws: WebSocket;
-}
-
-interface RoomUser {
-  name: string;
-  index: number;
-}
-
-interface Room {
-  roomId: number;
-  roomUsers: RoomUser[];
-}
-
-interface Winner {
-  name: string;
-  wins: number;
-}
-
-// Инициализируем коллекции и переменные
-export const players = new Map<string, Player>();
-export const rooms = new Map<number, Room>();
 export let gameIdCounter = 0;
-export const winners: Winner[] = [];
 
-// Обработка регистрации игрока
 export function handleRegistration(
   ws: WebSocket,
   data: { name: string; password: string }
@@ -56,9 +31,35 @@ export function handleRegistration(
   }
 }
 
-// Обработка создания комнаты
-export function handleCreateRoom(ws: WebSocket, name: string): void {
+export function handleCreateRoom(ws: WebSocket): void {
+  // Ищем текущего игрока по ws
+  const playerEntry = Array.from(players.entries()).find(
+    ([_, player]) => player.ws === ws
+  );
+
+  if (!playerEntry) {
+    sendError(ws, "Player not found");
+    return; // Завершаем выполнение, если игрок не найден
+  }
+
+  const name = playerEntry[0]; // Получаем имя из найденного игрока
   console.log(name, 123);
+
+  // Проверяем, есть ли уже комната у этого игрока
+  const currentRoom = Array.from(rooms.values()).find((room) =>
+    room.roomUsers.some((user) => user.name === name)
+  );
+
+  if (currentRoom) {
+    console.log(
+      `Игрок ${name} уже создал комнату ${currentRoom.roomId}. Удаляем старую комнату.`
+    );
+    // Удаляем старую комнату
+    rooms.delete(currentRoom.roomId);
+    console.log(`Старая комната ${currentRoom.roomId} удалена.`);
+  }
+
+  // Создаем новую комнату
   const roomId = gameIdCounter++;
   const roomUsers: RoomUser[] = [{ name, index: 1 }];
   rooms.set(roomId, { roomId, roomUsers });
@@ -91,21 +92,49 @@ export function updateRooms(ws: WebSocket): void {
 }
 
 // Обработка добавления пользователя в комнату
-export function handleAddUserToRoom(
-  ws: WebSocket,
-  indexRoom: number,
-  playerName: string
-): void {
-  console.log("функция вызвалась");
+export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   if (!rooms.has(indexRoom)) {
     console.log("error 1");
     sendError(ws, "Room does not exist");
     return;
   }
+
   if (typeof indexRoom === "undefined") {
     console.log("error 2");
     sendError(ws, "Invalid data format for adding user to room");
     return;
+  }
+
+  // Ищем текущего игрока по ws
+  const playerEntry = Array.from(players.entries()).find(
+    ([_, player]) => player.ws === ws
+  );
+
+  if (!playerEntry) {
+    sendError(ws, "Player not found");
+    return; // Завершаем выполнение, если игрок не найден
+  }
+
+  const playerName = playerEntry[0]; // Получаем имя из найденного игрока
+  const currentRoom = Array.from(rooms.values()).find((room) =>
+    room.roomUsers.some((user) => user.name === playerName)
+  );
+
+  // Проверяем, находится ли игрок уже в комнате
+  if (currentRoom) {
+    if (currentRoom.roomId === indexRoom) {
+      console.log(
+        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}. Ничего не делаем.`
+      );
+      return; // Если игрок пытается присоединиться к той же комнате, ничего не делаем
+    } else {
+      console.log(
+        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}. Удаляем старую комнату.`
+      );
+      // Удаляем старую комнату
+      rooms.delete(currentRoom.roomId);
+      console.log(`Старая комната ${currentRoom.roomId} удалена.`);
+    }
   }
 
   const room = rooms.get(indexRoom);
@@ -116,17 +145,16 @@ export function handleAddUserToRoom(
     return;
   }
 
-  room?.roomUsers.push({ name: playerName, index: 2 });
+  // Добавляем пользователя в комнату
+  room?.roomUsers.push({ name: playerName, index: room.roomUsers.length + 1 });
   console.log("here");
+
   updateRooms(ws);
   startGame(indexRoom);
 }
 
 // Обновление списка победителей
-export function updateWinners(
-  ws: WebSocket,
-  winnerData: { name: string; wins: number }
-): void {
+export function updateWinners(ws: WebSocket, winnerData: Winner): void {
   const { name, wins } = winnerData || {};
 
   if (name && wins) {
@@ -158,7 +186,7 @@ export function startGame(roomId: number): void {
     return;
   }
 
-  gamers.forEach((gamer, index) => {
+  gamers.forEach((gamer, index: number) => {
     const playerName = gamer.name;
     const playerWs = players.get(playerName)?.ws;
 

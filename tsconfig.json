@@ -13,7 +13,7 @@
   },
   "include": [
     "src/**/*.ts"  
-  ],
+, "src/http_server/utils/broadcast.js"  ],
   "exclude": [
     "node_modules", 
     "dist"
