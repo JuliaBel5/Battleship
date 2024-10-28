@@ -8,7 +8,7 @@ export function checkForWin(
   console.log(targetPlayer.board);
   for (let row of targetPlayer.board) {
     for (let cell of row) {
-      if (cell.hasShip && (!cell.shot || !cell.killed)) {
+      if (cell.hasShip && !cell.shot) {
         return false;
       }
     }
