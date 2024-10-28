@@ -41,6 +41,7 @@ export function performAttack(
   if (shotShip) {
     const { position, direction, length } = shotShip;
     cell.shot = true;
+
     if (length === 1) {
       const currentPlayer = getNextPlayer(gameId, targetPlayerId);
       const surroundingCells = getSurroundingCells(
@@ -50,6 +51,8 @@ export function performAttack(
         targetPlayerId,
         gameId
       );
+
+      cell.killed = true;
       sendAttackFeedback(gameId, surroundingCells, currentPlayer, "miss");
       return { shot: true, killed: true };
     }
@@ -70,9 +73,12 @@ export function performAttack(
         targetPlayerId,
         gameId
       );
+      cell.killed = true;
+
       sendAttackFeedback(gameId, surroundingCells, currentPlayer, "miss");
       return { shot: true, killed: true };
     }
+    cell.shot = true;
     console.log({ shot: true, killed: false });
     return { shot: true, killed: false };
   }

@@ -120,18 +120,17 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
     room.roomUsers.some((user) => user.name === playerName)
   );
 
-  // Проверяем, находится ли игрок уже в комнате
   if (currentRoom) {
     if (currentRoom.roomId === indexRoom) {
       console.log(
-        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}. Ничего не делаем.`
+        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}. `
       );
-      return; // Если игрок пытается присоединиться к той же комнате, ничего не делаем
+      return;
     } else {
       console.log(
-        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}. Удаляем старую комнату.`
+        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}.`
       );
-      // Удаляем старую комнату
+
       rooms.delete(currentRoom.roomId);
       console.log(`Старая комната ${currentRoom.roomId} удалена.`);
     }
@@ -145,7 +144,7 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
     return;
   }
 
-  // Добавляем пользователя в комнату
+  
   room?.roomUsers.push({ name: playerName, index: room.roomUsers.length + 1 });
   console.log("here");
 
@@ -153,8 +152,9 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   startGame(indexRoom);
 }
 
-// Обновление списка победителей
-export function updateWinners(ws: WebSocket, winnerData: Winner): void {
+
+
+export function updateWinners(winnerData: Winner): void {
   const { name, wins } = winnerData || {};
 
   if (name && wins) {

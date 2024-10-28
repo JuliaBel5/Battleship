@@ -1,5 +1,11 @@
 import { WebSocket } from "ws";
-import { GameBoard, GameData, games, PlayerData } from "../utils/dataBase.js";
+import {
+  GameBoard,
+  GameData,
+  games,
+  PlayerData,
+  winners,
+} from "../utils/dataBase.js";
 import { updateWinners } from "./actions.js";
 import {
   AddShipsMessage,
@@ -15,6 +21,7 @@ import {
 import { getNextPlayer } from "../utils/getNextPlayer.js";
 import { checkForWin } from "../utils/checkForWin.js";
 import { performAttack } from "../utils/performAttack.js";
+import { getPlayerName } from "../utils/getPlayerName.js";
 
 export function handleAddShips(ws: WebSocket, data: any) {
   const parsedData = JSON.parse(data.data);
@@ -172,10 +179,11 @@ export function handleAttack(ws: WebSocket, data: any) {
       id: 0,
     };
     broadcastToGamePlayers(gameId, finishMessage);
-    //обновить победителей для всех участников
+    const winnerName = getPlayerName(ws) || "unknown"
+    const winner = {name: winnerName, wins: 1}
+    updateWinners(winner);
   }
 }
-
 export function broadcastToGamePlayers<T>(
   gameId: string | number,
   message: Message<T>
