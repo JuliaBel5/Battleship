@@ -47,15 +47,12 @@ export function handleAddShips(ws: WebSocket, data: any) {
 
   games[gameId].shipsReadyCount += 1;
 
-  if (
-    games[gameId].shipsReadyCount === 2 ||
-    games[1232132].shipsReadyCount === 2
-  ) {
+  if (games[gameId].shipsReadyCount === 2) {
     const players = games[gameId].players;
 
-    if (gameId === 1232132) {
+    if (games[gameId].isBotGame) {
       const playerData = players[2];
-      playerData.ws.send(
+      playerData.ws?.send(
         JSON.stringify({
           type: "start_game",
           data: JSON.stringify({
@@ -82,9 +79,9 @@ export function handleAddShips(ws: WebSocket, data: any) {
         }
       }
     }
-    if (gameId === 1232132) {
+    if (games[gameId].isBotGame) {
       const playerData = players[2];
-      playerData.ws.send(
+      playerData.ws?.send(
         JSON.stringify({
           type: "turn",
           data: JSON.stringify({
@@ -181,7 +178,7 @@ export function handleAttack(ws: WebSocket, data: any) {
     }),
     id: 0,
   };
-  if (gameId === 1232132) {
+  if (games[gameId].isBotGame) {
     ws.send(JSON.stringify(attackResponse));
   } else {
     broadcastToGamePlayers(gameId, attackResponse);
@@ -194,13 +191,13 @@ export function handleAttack(ws: WebSocket, data: any) {
       data: JSON.stringify({ currentPlayer: Number(nextPlayer) }),
       id: 0,
     };
-    if (gameId === 1232132 && Number(nextPlayer) === 1) {
+    if (games[gameId].isBotGame && Number(nextPlayer) === 1) {
       ws.send(JSON.stringify(turnInfo));
       setTimeout(() => {
         const randomAtackMessage = {
           type: "randomAttack",
           data: JSON.stringify({
-            gameId: 1232132,
+            gameId: gameId,
             indexPlayer: 1,
           }),
           id: 0,
@@ -208,7 +205,7 @@ export function handleAttack(ws: WebSocket, data: any) {
         handleRandomAttack(ws, randomAtackMessage);
       }, 3000);
     }
-    if (gameId === 1232132) {
+    if (games[gameId].isBotGame) {
       ws.send(JSON.stringify(turnInfo));
     } else {
       broadcastToGamePlayers(gameId, turnInfo);
@@ -220,14 +217,14 @@ export function handleAttack(ws: WebSocket, data: any) {
       data: JSON.stringify({ currentPlayer: nextPlayer }),
       id: 0,
     };
-    if (gameId === 1232132 && Number(nextPlayer) === 1) {
+    if (games[gameId].isBotGame && Number(nextPlayer) === 1) {
       ws.send(JSON.stringify(turnInfo));
 
       setTimeout(() => {
         const randomAtackMessage = {
           type: "randomAttack",
           data: JSON.stringify({
-            gameId: 1232132,
+            gameId: gameId,
             indexPlayer: 1,
           }),
           id: 0,
@@ -235,7 +232,7 @@ export function handleAttack(ws: WebSocket, data: any) {
         handleRandomAttack(ws, randomAtackMessage);
       }, 3000);
     }
-    if (gameId === 1232132) {
+    if (games[gameId].isBotGame) {
       ws.send(JSON.stringify(turnInfo));
     } else {
       broadcastToGamePlayers(gameId, turnInfo);

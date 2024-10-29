@@ -5,7 +5,7 @@ export interface Player {
   name: string;
   password: string;
   wins: number;
-  ws: WebSocket;
+  ws: WebSocket | null;
 }
 
 export interface RoomUser {
@@ -32,13 +32,14 @@ export interface GameCell {
 export interface PlayerData {
   board: GameBoard;
   ships: ShipPosition[];
-  ws: WebSocket;
+  ws: WebSocket | null;
 }
 
 export interface GameData {
   players: { [id: number | string]: PlayerData };
   shipsReadyCount: number;
   indexPlayer: number | string;
+  isBotGame?: boolean;
 }
 
 export interface Games {

@@ -159,7 +159,7 @@ export function updateWinners(winnerData: Winner): void {
     if (existingWinner) {
       existingWinner.wins += 1;
     } else {
-      winners.push({ name, wins });
+      winners.push({ name, wins: 1 });
     }
   }
   const updateWinnerMessage = JSON.stringify({
