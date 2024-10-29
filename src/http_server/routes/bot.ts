@@ -42,6 +42,10 @@ export function handleCreateRoomForBot(ws: WebSocket): void {
     { name, index: 2 },
     { name: "Bot", index: 1 },
   ];
+
+  if (games[roomId]) {
+    delete games[roomId];
+  }
   rooms.set(roomId, { roomId, roomUsers });
 
   ws.send(

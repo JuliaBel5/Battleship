@@ -102,5 +102,5 @@ export function placeRandomShips(
   }
 
   playerData.board = board;
-  games[gameId].shipsReadyCount += 1;
+  games[gameId].shipsReadyCount = 1;
 }
