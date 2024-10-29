@@ -17,12 +17,10 @@ export function performAttack(
     return { shot: false, message: "Already attacked" };
   }
   if (cell.shot) {
-
     return { shot: true };
   }
 
   if (!cell.hasShip) {
-
     return { shot: false };
   }
 
@@ -92,55 +90,53 @@ export function getSurroundingCells(
 ): { x: number; y: number }[] {
   const surroundingCells: { x: number; y: number }[] = [];
   const { x, y } = shipPosition;
-
   const game = games[gameId];
   const targetPlayer = game.players[targetPlayerId];
+  const boardSize = targetPlayer.board.length;
 
   for (let i = 0; i < length; i++) {
     const posX = direction ? x : x + i;
     const posY = direction ? y + i : y;
 
-    surroundingCells.push({ x: posX - 1, y: posY });
-    surroundingCells.push({ x: posX + 1, y: posY });
-    surroundingCells.push({ x: posX, y: posY - 1 });
-    surroundingCells.push({ x: posX, y: posY + 1 });
+    if (posX - 1 >= 0) surroundingCells.push({ x: posX - 1, y: posY });
+    if (posX + 1 < boardSize) surroundingCells.push({ x: posX + 1, y: posY });
+    if (posY - 1 >= 0) surroundingCells.push({ x: posX, y: posY - 1 });
+    if (posY + 1 < boardSize) surroundingCells.push({ x: posX, y: posY + 1 });
   }
 
   for (let i = 0; i < length; i++) {
     const posX = direction ? x : x + i;
     const posY = direction ? y + i : y;
 
-    surroundingCells.push({ x: posX - 1, y: posY - 1 });
-    surroundingCells.push({ x: posX + 1, y: posY - 1 });
-    surroundingCells.push({ x: posX - 1, y: posY + 1 });
-    surroundingCells.push({ x: posX + 1, y: posY + 1 });
+    if (posX - 1 >= 0 && posY - 1 >= 0)
+      surroundingCells.push({ x: posX - 1, y: posY - 1 });
+    if (posX + 1 < boardSize && posY - 1 >= 0)
+      surroundingCells.push({ x: posX + 1, y: posY - 1 });
+    if (posX - 1 >= 0 && posY + 1 < boardSize)
+      surroundingCells.push({ x: posX - 1, y: posY + 1 });
+    if (posX + 1 < boardSize && posY + 1 < boardSize)
+      surroundingCells.push({ x: posX + 1, y: posY + 1 });
   }
 
   if (direction) {
-    surroundingCells.push({ x: x - 1, y: y });
-    surroundingCells.push({ x: x + 1, y: y });
-    surroundingCells.push({ x: x, y: y - 1 });
-    surroundingCells.push({ x: x, y: y + length });
-
-    surroundingCells.push({ x: x - 1, y: y - 1 });
-    surroundingCells.push({ x: x + 1, y: y - 1 });
-    surroundingCells.push({ x: x - 1, y: y + length });
-    surroundingCells.push({ x: x + 1, y: y + length });
+    if (x - 1 >= 0) surroundingCells.push({ x: x - 1, y: y });
+    if (x + 1 < boardSize) surroundingCells.push({ x: x + 1, y: y });
+    if (y - 1 >= 0) surroundingCells.push({ x: x, y: y - 1 });
+    if (y + length < boardSize) surroundingCells.push({ x: x, y: y + length });
   } else {
-    surroundingCells.push({ x: x, y: y - 1 });
-    surroundingCells.push({ x: x, y: y + 1 });
-    surroundingCells.push({ x: x - 1, y: y });
-    surroundingCells.push({ x: x + length - 1, y: y });
-
-    surroundingCells.push({ x: x - 1, y: y - 1 });
-    surroundingCells.push({ x: x + length - 1, y: y - 1 });
-    surroundingCells.push({ x: x - 1, y: y + 1 });
-    surroundingCells.push({ x: x + length - 1, y: y + 1 });
+    if (x - 1 >= 0) surroundingCells.push({ x: x - 1, y: y });
+    if (x + length < boardSize) surroundingCells.push({ x: x + length, y: y });
+    if (y - 1 >= 0) surroundingCells.push({ x: x, y: y - 1 });
+    if (y + 1 < boardSize) surroundingCells.push({ x: x, y: y + 1 });
   }
 
   return surroundingCells.filter(
     (cell) =>
-      cell.x >= 0 && cell.y >= 0 && !targetPlayer.board[cell.y][cell.x]?.shot
+      cell.x >= 0 &&
+      cell.x < boardSize &&
+      cell.y >= 0 &&
+      cell.y < boardSize &&
+      !targetPlayer.board[cell.y][cell.x].shot
   );
 }
 
