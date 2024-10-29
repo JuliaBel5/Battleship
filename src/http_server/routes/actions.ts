@@ -1,4 +1,5 @@
 import { players, rooms, RoomUser, winners } from "../utils/dataBase";
+import { getPlayerName } from "../utils/getPlayerName";
 import { sendError } from "../utils/sendError";
 import { Winner } from "../utils/types";
 import { wsServer } from "../wsServer";
@@ -62,16 +63,12 @@ export function handleRegistration(
 }
 
 export function handleCreateRoom(ws: WebSocket): void {
-  const playerEntry = Array.from(players.entries()).find(
-    ([_, player]) => player.ws === ws
-  );
+  const name = getPlayerName(ws);
 
-  if (!playerEntry) {
+  if (!name) {
     sendError(ws, "Player not found");
     return;
   }
-
-  const name = playerEntry[0];
 
   const currentRoom = Array.from(rooms.values()).find((room) =>
     room.roomUsers.some((user) => user.name === name)
@@ -123,16 +120,12 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
     return;
   }
 
-  const playerEntry = Array.from(players.entries()).find(
-    ([_, player]) => player.ws === ws
-  );
-
-  if (!playerEntry) {
+  const playerName = getPlayerName(ws);
+  if (!playerName) {
     sendError(ws, "Player not found");
     return;
   }
 
-  const playerName = playerEntry[0];
   const currentRoom = Array.from(rooms.values()).find((room) =>
     room.roomUsers.some((user) => user.name === playerName)
   );
@@ -164,7 +157,7 @@ export function updateWinners(winnerData: Winner): void {
   if (name && wins) {
     const existingWinner = winners.find((winner) => winner.name === name);
     if (existingWinner) {
-      existingWinner.wins;
+      existingWinner.wins += 1;
     } else {
       winners.push({ name, wins });
     }
