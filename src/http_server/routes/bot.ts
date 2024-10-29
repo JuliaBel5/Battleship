@@ -1,4 +1,4 @@
-import { placeRandomShips } from "../createShipsForBot";
+import { placeRandomShips } from "../utils/createShipsForBot";
 import { games, players, rooms, RoomUser } from "../utils/dataBase";
 import { sendError } from "../utils/sendError";
 import {

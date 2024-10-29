@@ -1,6 +1,6 @@
-import { addShipToPlayer } from "./routes/game";
-import { GameBoard, games } from "./utils/dataBase";
-import { ShipPosition } from "./utils/types";
+import { addShipToPlayer } from "../routes/game";
+import { GameBoard, games } from "./dataBase";
+import { ShipPosition } from "./types";
 
 const BOARD_SIZE = 10;
 
