@@ -44,8 +44,8 @@ export function handleCreateRoomForBot(ws: WebSocket): void {
 
   const roomId = 1232132;
   const roomUsers: RoomUser[] = [
-    { name, index: 1 },
-    { name: "Bot", index: 2 },
+    { name, index: 2 },
+    { name: "Bot", index: 1 },
   ];
   rooms.set(roomId, { roomId, roomUsers });
 
@@ -68,11 +68,17 @@ export function handleCreateRoomForBot(ws: WebSocket): void {
     };
   }
 
-  if (!games[roomId].players[2]) {
-    initializePlayer(roomId, 2, ws);
+  if (!games[roomId].players[1]) {
+    initializePlayer(roomId, 1, ws);
   }
 
   updateRooms(ws);
-  startGame(roomId);
-  placeRandomShips(1232132, 2);
+  placeRandomShips(1232132, 1);
+  ws.send(
+    JSON.stringify({
+      type: "create_game",
+      data: JSON.stringify({ idGame: roomId, idPlayer: 2 }),
+      id: 0,
+    })
+  );
 }

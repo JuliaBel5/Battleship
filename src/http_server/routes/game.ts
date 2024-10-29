@@ -47,7 +47,10 @@ export function handleAddShips(ws: WebSocket, data: any) {
 
   games[gameId].shipsReadyCount += 1;
 
-  if (games[gameId].shipsReadyCount === 2) {
+  if (
+    games[gameId].shipsReadyCount === 2 ||
+    games[1232132].shipsReadyCount === 2
+  ) {
     const players = games[gameId].players;
 
     for (const playerIndex in players) {
@@ -60,7 +63,7 @@ export function handleAddShips(ws: WebSocket, data: any) {
               ships: playerData.ships,
               currentPlayerIndex: indexPlayer,
             }),
-            id: data.id,
+            id: 0,
           })
         );
       }
@@ -136,6 +139,7 @@ export function handleAttack(ws: WebSocket, data: any) {
   const parsedData = JSON.parse(data.data);
   const { gameId, x, y, indexPlayer } = parsedData;
   const targetPlayer = getNextPlayer(gameId, indexPlayer);
+  console.log(targetPlayer, "targetPlayer", indexPlayer, "indexPlayer");
   const result = performAttack(gameId, x, y, targetPlayer);
   let attackStatus: "miss" | "killed" | "shot" = result.shot ? "shot" : "miss";
 

@@ -73,7 +73,11 @@ export function placeRandomShips(
             type,
             length,
           };
-
+          for (let j = 0; j < length; j++) {
+            const posX = direction ? x : x + j;
+            const posY = direction ? y + j : y;
+            board[posY][posX].hasShip = true;
+          }
           addShipToPlayer(gameId, playerId, shipPosition);
 
           placed = true;
@@ -83,4 +87,5 @@ export function placeRandomShips(
   }
 
   playerData.board = board;
+  games[gameId].shipsReadyCount += 1;
 }
