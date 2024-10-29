@@ -21,7 +21,6 @@ export interface Message<T> {
   id: number;
 }
 
-// Player messages
 export interface RegisterRequest {
   name: string;
   password: string;
@@ -44,9 +43,7 @@ export interface Winner {
 
 export type UpdateWinnersMessage = Message<Winner[]>;
 
-export interface CreateRoomRequest {
-  // Additional data can be added if needed
-}
+export interface CreateRoomRequest {}
 
 export interface AddUserToRoomRequest {
   indexRoom: number | string;
@@ -54,7 +51,7 @@ export interface AddUserToRoomRequest {
 
 export interface CreateGameResponse {
   idGame: number | string;
-  idPlayer: number | string; // Unique ID for each player in the game session
+  idPlayer: number | string;
 }
 
 export type CreateRoomMessage = Message<CreateRoomRequest>;
@@ -92,8 +89,8 @@ export interface AddShipsRequest {
 export type AddShipsMessage = Message<AddShipsRequest>;
 
 export interface StartGameRequest {
-  ships: ShipPosition[]; // Player's ships, not enemy's
-  currentPlayerIndex: number | string; // ID of the player in the current game session
+  ships: ShipPosition[];
+  currentPlayerIndex: number | string;
 }
 
 export type StartGameMessage = Message<StartGameRequest>;
@@ -102,7 +99,7 @@ export interface AttackRequest {
   gameId: number | string;
   x: number;
   y: number;
-  indexPlayer: number | string; // ID of the player in the current game session
+  indexPlayer: number | string;
 }
 
 export interface AttackResult {
@@ -116,21 +113,21 @@ export interface AttackFeedback {
     x: number;
     y: number;
   };
-  currentPlayer: number | string; // ID of the player in the current game session
+  currentPlayer: number | string;
   status: "miss" | "killed" | "shot";
 }
 
 export interface RandomAttackRequest {
   gameId: number | string;
-  indexPlayer: number | string; // ID of the player in the current game session
+  indexPlayer: number | string;
 }
 
 export interface TurnInfo {
-  currentPlayer: number | string; // ID of the player in the current game session
+  currentPlayer: number | string;
 }
 
 export interface FinishGame {
-  winPlayer: number | string; // ID of the player in the current game session
+  winPlayer: number | string;
 }
 
 export type AttackFeedbackMessage = Message<AttackFeedback>;

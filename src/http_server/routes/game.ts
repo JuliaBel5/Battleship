@@ -83,7 +83,7 @@ export function handleAddShips(ws: WebSocket, data: any) {
   }
 }
 
-function initializePlayer(
+export function initializePlayer(
   gameId: string | number,
   playerId: string | number,
   ws: WebSocket
@@ -94,7 +94,7 @@ function initializePlayer(
   games[gameId].players[playerId] = { board, ships: [], ws };
 }
 
-function addShipToPlayer(
+export function addShipToPlayer(
   gameId: string | number,
   playerId: string | number,
   ship: ShipPosition
@@ -142,7 +142,6 @@ export function handleAttack(ws: WebSocket, data: any) {
   if (result.shot && result.killed) {
     attackStatus = "killed";
   }
-  console.log(attackStatus);
 
   const attackResponse: any = {
     type: "attack",
@@ -202,8 +201,6 @@ export function broadcastToGamePlayers<T>(
 export function handleRandomAttack(ws: WebSocket, data: any) {
   const parsedData = JSON.parse(data.data);
   const { gameId, indexPlayer } = parsedData;
-
-  console.log(gameId, indexPlayer);
   const targetPlayer = getNextPlayer(gameId, indexPlayer);
 
   const opponentBoard = games[gameId].players[targetPlayer].board;

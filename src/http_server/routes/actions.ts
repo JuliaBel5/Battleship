@@ -62,7 +62,6 @@ export function handleRegistration(
 }
 
 export function handleCreateRoom(ws: WebSocket): void {
-  // Ищем текущего игрока по ws
   const playerEntry = Array.from(players.entries()).find(
     ([_, player]) => player.ws === ws
   );
@@ -120,28 +119,25 @@ export function updateRooms(ws: WebSocket): void {
 
 export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   if (!rooms.has(indexRoom)) {
-    console.log("error 1");
     sendError(ws, "Room does not exist");
     return;
   }
 
   if (typeof indexRoom === "undefined") {
-    console.log("error 2");
     sendError(ws, "Invalid data format for adding user to room");
     return;
   }
 
-  // Ищем текущего игрока по ws
   const playerEntry = Array.from(players.entries()).find(
     ([_, player]) => player.ws === ws
   );
 
   if (!playerEntry) {
     sendError(ws, "Player not found");
-    return; // Завершаем выполнение, если игрок не найден
+    return;
   }
 
-  const playerName = playerEntry[0]; // Получаем имя из найденного игрока
+  const playerName = playerEntry[0];
   const currentRoom = Array.from(rooms.values()).find((room) =>
     room.roomUsers.some((user) => user.name === playerName)
   );
@@ -163,7 +159,6 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   }
 
   const room = rooms.get(indexRoom);
-  console.log(room, "room");
 
   if (room && room.roomUsers.length >= 2) {
     sendError(ws, "Room is already full");
@@ -171,7 +166,6 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   }
 
   room?.roomUsers.push({ name: playerName, index: room.roomUsers.length + 1 });
-  console.log("here");
 
   updateRooms(ws);
   startGame(indexRoom);
@@ -183,9 +177,9 @@ export function updateWinners(winnerData: Winner): void {
   if (name && wins) {
     const existingWinner = winners.find((winner) => winner.name === name);
     if (existingWinner) {
-      existingWinner.wins += 1;
+      existingWinner.wins;
     } else {
-      winners.push({ name, wins: 1 });
+      winners.push({ name, wins });
     }
 
     console.log(`Winner updated: ${name}`);
@@ -199,7 +193,6 @@ export function updateWinners(winnerData: Winner): void {
   broadcastToAllClients(updateWinnerMessage);
 }
 
-// Запуск игры
 export function startGame(roomId: number): void {
   const idGame = roomId;
   const gamers = rooms.get(roomId)?.roomUsers;
@@ -229,7 +222,6 @@ export function startGame(roomId: number): void {
   });
 }
 
-// Рассылка сообщений всем клиентам
 function broadcastToAllClients(data: string): void {
   const message = data;
 

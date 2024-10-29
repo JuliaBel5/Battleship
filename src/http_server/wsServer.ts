@@ -10,6 +10,7 @@ import {
   handleAttack,
   handleRandomAttack,
 } from "./routes/game.js";
+import { handleGameWithBot } from "./routes/bot.js";
 
 export const wsServer = new WebSocketServer({ port: 3000 });
 
@@ -47,6 +48,10 @@ wsServer.on("connection", (ws) => {
 
         case "randomAttack":
           handleRandomAttack(ws, data);
+          break;
+
+        case "single_play":
+          handleGameWithBot(ws);
           break;
 
         default:

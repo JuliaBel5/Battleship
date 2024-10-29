@@ -22,6 +22,13 @@ export type GameBoard = Array<
   Array<{ hasShip: boolean; shot: boolean; length: number; killed?: boolean }>
 >;
 
+export interface GameCell {
+  hasShip: boolean;
+  shot: boolean;
+  length: number;
+  killed?: boolean;
+}
+
 export interface PlayerData {
   board: GameBoard;
   ships: ShipPosition[];

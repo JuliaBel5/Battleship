@@ -17,12 +17,12 @@ export function performAttack(
     return { shot: false, message: "Already attacked" };
   }
   if (cell.shot) {
-    console.log({ shot: true });
+
     return { shot: true };
   }
 
   if (!cell.hasShip) {
-    console.log({ shot: false });
+
     return { shot: false };
   }
 
@@ -64,7 +64,6 @@ export function performAttack(
     });
 
     if (killed) {
-      console.log({ shot: true, killed: true });
       const currentPlayer = getNextPlayer(gameId, targetPlayerId);
       const surroundingCells = getSurroundingCells(
         position,
@@ -79,10 +78,8 @@ export function performAttack(
       return { shot: true, killed: true };
     }
     cell.shot = true;
-    console.log({ shot: true, killed: false });
     return { shot: true, killed: false };
   }
-  console.log("Ошибка");
   return { shot: false, message: "Error in attack processing" };
 }
 
