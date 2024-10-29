@@ -5,7 +5,6 @@ import { updateRooms } from "./actions";
 import WebSocket from "ws";
 import { initializePlayer } from "./game";
 import { getPlayerName } from "../utils/getPlayerName";
-import { v4 as uuidv4 } from "uuid";
 
 let bootsGameIds = 777;
 

@@ -1,9 +1,5 @@
 # WebSocket Battleship Server
 
-## Assignment
-
-Implement a backend for a battleship game using WebSocket technology.
-
 ## Description
 
 Your task is to create a battleship game backend capable of handling player interactions and game state management via WebSocket connections. Players can register, create or join rooms, and engage in battles with each other.
@@ -17,12 +13,6 @@ Your task is to create a battleship game backend capable of handling player inte
 - **Manage Ships Requests**
 - **Manage Game Requests**
 - **(Optional) Create Single Play Bot**
-
-## Technical Requirements
-
-- Implement the task in **JavaScript or TypeScript**.
-- Use **Node.js version 22.x.x** (22.9.0 or higher).
-- The backend should support JSON string requests and responses.
 
 # RSSchool NodeJS websocket task template
 
