@@ -28,6 +28,22 @@ function canPlaceShip(
     ) {
       return false;
     }
+
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const checkX = posX + dx;
+        const checkY = posY + dy;
+        if (
+          checkX >= 0 &&
+          checkX < BOARD_SIZE &&
+          checkY >= 0 &&
+          checkY < BOARD_SIZE &&
+          board[checkY][checkX].hasShip
+        ) {
+          return false;
+        }
+      }
+    }
   }
   return true;
 }
@@ -79,7 +95,6 @@ export function placeRandomShips(
             board[posY][posX].hasShip = true;
           }
           addShipToPlayer(gameId, playerId, shipPosition);
-
           placed = true;
         }
       }
