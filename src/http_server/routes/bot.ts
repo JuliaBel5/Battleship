@@ -34,12 +34,7 @@ export function handleCreateRoomForBot(ws: WebSocket): void {
   );
 
   if (currentRoom) {
-    console.log(
-      `Игрок ${name} уже создал комнату ${currentRoom.roomId}. Удаляем старую комнату.`
-    );
-
     rooms.delete(currentRoom.roomId);
-    console.log(`Старая комната ${currentRoom.roomId} удалена.`);
   }
 
   const roomId = 1232132;
@@ -64,7 +59,7 @@ export function handleCreateRoomForBot(ws: WebSocket): void {
     games[roomId] = {
       players: {},
       shipsReadyCount: 0,
-      indexPlayer: 2,
+      indexPlayer: 1,
     };
   }
 

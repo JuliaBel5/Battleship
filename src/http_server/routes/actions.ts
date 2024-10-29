@@ -78,12 +78,7 @@ export function handleCreateRoom(ws: WebSocket): void {
   );
 
   if (currentRoom) {
-    console.log(
-      `Игрок ${name} уже создал комнату ${currentRoom.roomId}. Удаляем старую комнату.`
-    );
-
     rooms.delete(currentRoom.roomId);
-    console.log(`Старая комната ${currentRoom.roomId} удалена.`);
   }
 
   const roomId = gameIdCounter++;
@@ -144,17 +139,9 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
 
   if (currentRoom) {
     if (currentRoom.roomId === indexRoom) {
-      console.log(
-        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}. `
-      );
       return;
     } else {
-      console.log(
-        `Игрок ${playerName} уже находится в комнате ${currentRoom.roomId}.`
-      );
-
       rooms.delete(currentRoom.roomId);
-      console.log(`Старая комната ${currentRoom.roomId} удалена.`);
     }
   }
 
@@ -181,8 +168,6 @@ export function updateWinners(winnerData: Winner): void {
     } else {
       winners.push({ name, wins });
     }
-
-    console.log(`Winner updated: ${name}`);
   }
   const updateWinnerMessage = JSON.stringify({
     type: "update_winners",

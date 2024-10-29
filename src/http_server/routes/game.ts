@@ -53,34 +53,60 @@ export function handleAddShips(ws: WebSocket, data: any) {
   ) {
     const players = games[gameId].players;
 
-    for (const playerIndex in players) {
-      const playerData = players[playerIndex];
-      if (playerData.ws) {
-        playerData.ws.send(
-          JSON.stringify({
-            type: "start_game",
-            data: JSON.stringify({
-              ships: playerData.ships,
-              currentPlayerIndex: indexPlayer,
-            }),
-            id: 0,
-          })
-        );
+    if (gameId === 1232132) {
+      const playerData = players[2];
+      playerData.ws.send(
+        JSON.stringify({
+          type: "start_game",
+          data: JSON.stringify({
+            ships: playerData.ships,
+            currentPlayerIndex: indexPlayer,
+          }),
+          id: 0,
+        })
+      );
+    } else {
+      for (const playerIndex in players) {
+        const playerData = players[playerIndex];
+        if (playerData.ws) {
+          playerData.ws.send(
+            JSON.stringify({
+              type: "start_game",
+              data: JSON.stringify({
+                ships: playerData.ships,
+                currentPlayerIndex: indexPlayer,
+              }),
+              id: 0,
+            })
+          );
+        }
       }
     }
-
-    for (const playerIndex in players) {
-      const playerData = players[playerIndex];
-      if (playerData.ws) {
-        playerData.ws.send(
-          JSON.stringify({
-            type: "turn",
-            data: JSON.stringify({
-              currentPlayer: Number(indexPlayer),
-            }),
-            id: 0,
-          })
-        );
+    if (gameId === 1232132) {
+      const playerData = players[2];
+      playerData.ws.send(
+        JSON.stringify({
+          type: "turn",
+          data: JSON.stringify({
+            currentPlayer: Number(indexPlayer),
+          }),
+          id: 0,
+        })
+      );
+    } else {
+      for (const playerIndex in players) {
+        const playerData = players[playerIndex];
+        if (playerData.ws) {
+          playerData.ws.send(
+            JSON.stringify({
+              type: "turn",
+              data: JSON.stringify({
+                currentPlayer: Number(indexPlayer),
+              }),
+              id: 0,
+            })
+          );
+        }
       }
     }
   }
@@ -139,7 +165,6 @@ export function handleAttack(ws: WebSocket, data: any) {
   const parsedData = JSON.parse(data.data);
   const { gameId, x, y, indexPlayer } = parsedData;
   const targetPlayer = getNextPlayer(gameId, indexPlayer);
-  console.log(targetPlayer, "targetPlayer", indexPlayer, "indexPlayer");
   const result = performAttack(gameId, x, y, targetPlayer);
   let attackStatus: "miss" | "killed" | "shot" = result.shot ? "shot" : "miss";
 
@@ -156,16 +181,38 @@ export function handleAttack(ws: WebSocket, data: any) {
     }),
     id: 0,
   };
-  broadcastToGamePlayers(gameId, attackResponse);
-
+  if (gameId === 1232132) {
+    ws.send(JSON.stringify(attackResponse));
+  } else {
+    broadcastToGamePlayers(gameId, attackResponse);
+  }
   if (!result.shot) {
     const nextPlayer = getNextPlayer(gameId, indexPlayer);
+
     const turnInfo: any = {
       type: "turn",
       data: JSON.stringify({ currentPlayer: Number(nextPlayer) }),
       id: 0,
     };
-    broadcastToGamePlayers(gameId, turnInfo);
+    if (gameId === 1232132 && Number(nextPlayer) === 1) {
+      ws.send(JSON.stringify(turnInfo));
+      setTimeout(() => {
+        const randomAtackMessage = {
+          type: "randomAttack",
+          data: JSON.stringify({
+            gameId: 1232132,
+            indexPlayer: 1,
+          }),
+          id: 0,
+        };
+        handleRandomAttack(ws, randomAtackMessage);
+      }, 3000);
+    }
+    if (gameId === 1232132) {
+      ws.send(JSON.stringify(turnInfo));
+    } else {
+      broadcastToGamePlayers(gameId, turnInfo);
+    }
   } else if (result.shot) {
     const nextPlayer = Number(indexPlayer);
     const turnInfo: any = {
@@ -173,7 +220,26 @@ export function handleAttack(ws: WebSocket, data: any) {
       data: JSON.stringify({ currentPlayer: nextPlayer }),
       id: 0,
     };
-    broadcastToGamePlayers(gameId, turnInfo);
+    if (gameId === 1232132 && Number(nextPlayer) === 1) {
+      ws.send(JSON.stringify(turnInfo));
+
+      setTimeout(() => {
+        const randomAtackMessage = {
+          type: "randomAttack",
+          data: JSON.stringify({
+            gameId: 1232132,
+            indexPlayer: 1,
+          }),
+          id: 0,
+        };
+        handleRandomAttack(ws, randomAtackMessage);
+      }, 3000);
+    }
+    if (gameId === 1232132) {
+      ws.send(JSON.stringify(turnInfo));
+    } else {
+      broadcastToGamePlayers(gameId, turnInfo);
+    }
   }
 
   if (checkForWin(gameId, targetPlayer)) {
