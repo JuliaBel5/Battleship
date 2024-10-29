@@ -5,7 +5,6 @@ export function checkForWin(
   targetPlayerId: string | number
 ) {
   const targetPlayer = games[gameId].players[targetPlayerId];
-  console.log(targetPlayer.board);
   for (let row of targetPlayer.board) {
     for (let cell of row) {
       if (cell.hasShip && !cell.shot) {

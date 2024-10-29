@@ -5,7 +5,11 @@ import {
   handleAddUserToRoom,
 } from "./routes/actions.js";
 import { sendError } from "./utils/sendError";
-import { handleAddShips, handleAttack } from "./routes/game.js";
+import {
+  handleAddShips,
+  handleAttack,
+  handleRandomAttack,
+} from "./routes/game.js";
 
 export const wsServer = new WebSocketServer({ port: 3000 });
 
@@ -34,11 +38,15 @@ wsServer.on("connection", (ws) => {
           break;
 
         case "add_ships":
-          handleAddShips(ws, data); // Use the function from the imported module
+          handleAddShips(ws, data);
           break;
 
         case "attack":
           handleAttack(ws, data);
+          break;
+
+        case "randomAttack":
+          handleRandomAttack(ws, data);
           break;
 
         default:

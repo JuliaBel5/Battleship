@@ -15,6 +15,7 @@ import {
   FinishGame,
   FinishGameMessage,
   Message,
+  RandomAttackMessage,
   ShipPosition,
   TurnInfoMessage,
 } from "../utils/types.js";
@@ -179,11 +180,12 @@ export function handleAttack(ws: WebSocket, data: any) {
       id: 0,
     };
     broadcastToGamePlayers(gameId, finishMessage);
-    const winnerName = getPlayerName(ws) || "unknown"
-    const winner = {name: winnerName, wins: 1}
+    const winnerName = getPlayerName(ws) || "unknown";
+    const winner = { name: winnerName, wins: 1 };
     updateWinners(winner);
   }
 }
+
 export function broadcastToGamePlayers<T>(
   gameId: string | number,
   message: Message<T>
@@ -195,4 +197,32 @@ export function broadcastToGamePlayers<T>(
       playerData.ws.send(JSON.stringify(message));
     }
   }
+}
+
+export function handleRandomAttack(ws: WebSocket, data: any) {
+  const parsedData = JSON.parse(data.data);
+  const { gameId, indexPlayer } = parsedData;
+
+  console.log(gameId, indexPlayer);
+  const targetPlayer = getNextPlayer(gameId, indexPlayer);
+
+  const opponentBoard = games[gameId].players[targetPlayer].board;
+
+  let x, y;
+
+  do {
+    x = Math.floor(Math.random() * 10);
+    y = Math.floor(Math.random() * 10);
+  } while (opponentBoard[y][x].shot);
+
+  handleAttack(ws, {
+    type: "attack",
+    data: JSON.stringify({
+      gameId,
+      x,
+      y,
+      indexPlayer,
+    }),
+    id: 0,
+  });
 }

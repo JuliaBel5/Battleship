@@ -133,8 +133,27 @@ export interface FinishGame {
   winPlayer: number | string; // ID of the player in the current game session
 }
 
-export type AttackMessage = Message<AttackRequest>;
 export type AttackFeedbackMessage = Message<AttackFeedback>;
-export type RandomAttackMessage = Message<RandomAttackRequest>;
+
 export type TurnInfoMessage = Message<TurnInfo>;
 export type FinishGameMessage = Message<FinishGame>;
+
+export interface RandomAttackMessage {
+  type: "randomAttack";
+  data: {
+    gameId: number | string;
+    indexPlayer: number | string;
+  };
+  id: number;
+}
+
+export interface AttackMessage {
+  type: "attack";
+  data: {
+    gameId: number | string;
+    x: number;
+    y: number;
+    indexPlayer: number | string;
+  };
+  id: number;
+}

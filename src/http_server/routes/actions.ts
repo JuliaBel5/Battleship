@@ -11,24 +11,54 @@ export function handleRegistration(
   data: { name: string; password: string }
 ): void {
   const { name, password } = data;
+
   if (!name || !password) {
-    sendError(ws, "Name and password are required");
-    return;
-  }
-  if (players.has(name)) {
-    sendError(ws, "Player already exists");
-  } else {
-    players.set(name, { name, password, wins: 0, ws });
     ws.send(
       JSON.stringify({
         type: "reg",
-        data: JSON.stringify({ name, index: name, error: false }),
+        data: JSON.stringify({
+          name: "",
+          index: "",
+          error: true,
+          errorText: "Name and password are required",
+        }),
         id: 0,
       })
     );
-    sendWinnersList(ws);
-    updateRooms(ws);
+    return;
   }
+
+  if (players.has(name)) {
+    ws.send(
+      JSON.stringify({
+        type: "reg",
+        data: JSON.stringify({
+          name: "",
+          index: "",
+          error: true,
+          errorText: "Player already exists",
+        }),
+        id: 0,
+      })
+    );
+    return;
+  }
+
+  players.set(name, { name, password, wins: 0, ws });
+  ws.send(
+    JSON.stringify({
+      type: "reg",
+      data: JSON.stringify({
+        name,
+        index: name,
+        error: false,
+        errorText: "",
+      }),
+      id: 0,
+    })
+  );
+  sendWinnersList(ws);
+  updateRooms(ws);
 }
 
 export function handleCreateRoom(ws: WebSocket): void {
@@ -39,13 +69,11 @@ export function handleCreateRoom(ws: WebSocket): void {
 
   if (!playerEntry) {
     sendError(ws, "Player not found");
-    return; // Завершаем выполнение, если игрок не найден
+    return;
   }
 
-  const name = playerEntry[0]; // Получаем имя из найденного игрока
-  console.log(name, 123);
+  const name = playerEntry[0];
 
-  // Проверяем, есть ли уже комната у этого игрока
   const currentRoom = Array.from(rooms.values()).find((room) =>
     room.roomUsers.some((user) => user.name === name)
   );
@@ -54,12 +82,11 @@ export function handleCreateRoom(ws: WebSocket): void {
     console.log(
       `Игрок ${name} уже создал комнату ${currentRoom.roomId}. Удаляем старую комнату.`
     );
-    // Удаляем старую комнату
+
     rooms.delete(currentRoom.roomId);
     console.log(`Старая комната ${currentRoom.roomId} удалена.`);
   }
 
-  // Создаем новую комнату
   const roomId = gameIdCounter++;
   const roomUsers: RoomUser[] = [{ name, index: 1 }];
   rooms.set(roomId, { roomId, roomUsers });
@@ -91,7 +118,6 @@ export function updateRooms(ws: WebSocket): void {
   broadcastToAllClients(updateRoomMessage);
 }
 
-// Обработка добавления пользователя в комнату
 export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   if (!rooms.has(indexRoom)) {
     console.log("error 1");
@@ -144,15 +170,12 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
     return;
   }
 
-  
   room?.roomUsers.push({ name: playerName, index: room.roomUsers.length + 1 });
   console.log("here");
 
   updateRooms(ws);
   startGame(indexRoom);
 }
-
-
 
 export function updateWinners(winnerData: Winner): void {
   const { name, wins } = winnerData || {};
