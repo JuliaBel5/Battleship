@@ -7,13 +7,14 @@ import { initializePlayer } from "./game";
 import { getPlayerName } from "../utils/getPlayerName";
 import { v4 as uuidv4 } from "uuid";
 
-let bootsGameIds = 0;
+let bootsGameIds = 777;
 
 export function handleGameWithBot(ws: WebSocket) {
   const name = "Bot";
   const password = "password";
 
   players.set(name, { name, password, wins: 0, ws: null });
+  console.log(`Bot created: Name = ${name}`);
   handleCreateRoomForBot(ws);
 }
 
@@ -80,5 +81,10 @@ export function handleCreateRoomForBot(ws: WebSocket): void {
       data: JSON.stringify({ idGame: roomId, idPlayer: 2 }),
       id: 0,
     })
+  );
+  console.log(
+    `Room created for Bot: Room ID = ${roomId}, Users = ${JSON.stringify(
+      roomUsers
+    )}`
   );
 }

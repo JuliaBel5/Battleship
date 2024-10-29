@@ -58,8 +58,13 @@ export function handleRegistration(
       id: 0,
     })
   );
+  console.log(`Player "${name}" registered successfully`);
+
   sendWinnersList(ws);
+  console.log(`Winners list sent to player "${name}"`);
+
   updateRooms(ws);
+  console.log(`Rooms list updated for player "${name}"`);
 }
 
 export function handleCreateRoom(ws: WebSocket): void {
@@ -81,7 +86,7 @@ export function handleCreateRoom(ws: WebSocket): void {
   const roomId = gameIdCounter++;
   const roomUsers: RoomUser[] = [{ name, index: 1 }];
   rooms.set(roomId, { roomId, roomUsers });
-
+  console.log(`Room created: Room ID = ${roomId}, Created by = ${name}`);
   updateRooms(ws);
 }
 
@@ -146,7 +151,9 @@ export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   }
 
   room?.roomUsers.push({ name: playerName, index: room.roomUsers.length + 1 });
-
+  console.log(
+    `User added to room: Player = ${playerName}, Room ID = ${indexRoom}`
+  );
   updateRooms(ws);
   startGame(indexRoom);
 }
@@ -195,7 +202,9 @@ export function startGame(roomId: number): void {
       data: JSON.stringify({ idGame, idPlayer: playerId }),
       id: 0,
     });
-
+    console.log(
+      `Game started in room: Room ID = ${roomId}, Game ID = ${idGame}`
+    );
     playerWs.send(startGameMessage);
   });
 }

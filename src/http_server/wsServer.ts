@@ -63,3 +63,20 @@ wsServer.on("connection", (ws) => {
     }
   });
 });
+function closeWebSocketServer() {
+  console.log("Closing all WebSocket connections...");
+  wsServer.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.close();
+    }
+  });
+  wsServer.close(() => {
+    console.log("WebSocket server closed");
+  });
+}
+
+process.on("SIGINT", () => {
+  closeWebSocketServer();
+  console.log("Application closed.");
+  process.exit();
+});

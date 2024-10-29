@@ -7,18 +7,7 @@ import {
   winners,
 } from "../utils/dataBase.js";
 import { updateWinners } from "./actions.js";
-import {
-  AddShipsMessage,
-  AttackFeedbackMessage,
-  AttackMessage,
-  AttackResult,
-  FinishGame,
-  FinishGameMessage,
-  Message,
-  RandomAttackMessage,
-  ShipPosition,
-  TurnInfoMessage,
-} from "../utils/types.js";
+import { Message, ShipPosition } from "../utils/types.js";
 import { getNextPlayer } from "../utils/getNextPlayer.js";
 import { checkForWin } from "../utils/checkForWin.js";
 import { performAttack } from "../utils/performAttack.js";
@@ -107,6 +96,7 @@ export function handleAddShips(ws: WebSocket, data: any) {
       }
     }
   }
+  console.log(`Ships added for Player ${indexPlayer} `);
 }
 
 export function initializePlayer(
@@ -168,7 +158,7 @@ export function handleAttack(ws: WebSocket, data: any) {
   if (result.shot && result.killed) {
     attackStatus = "killed";
   }
-
+  console.log(`Player ${indexPlayer}: ${attackStatus}`);
   const attackResponse: any = {
     type: "attack",
     data: JSON.stringify({
@@ -248,6 +238,7 @@ export function handleAttack(ws: WebSocket, data: any) {
     broadcastToGamePlayers(gameId, finishMessage);
     const winnerName = getPlayerName(ws) || "unknown";
     const winner = { name: winnerName, wins: 1 };
+    console.log(`Player ${indexPlayer} wins!`);
     updateWinners(winner);
   }
 }
@@ -278,7 +269,7 @@ export function handleRandomAttack(ws: WebSocket, data: any) {
     x = Math.floor(Math.random() * 10);
     y = Math.floor(Math.random() * 10);
   } while (opponentBoard[y][x].shot);
-
+  console.log(`Random attack by Player ${indexPlayer}`);
   handleAttack(ws, {
     type: "attack",
     data: JSON.stringify({
