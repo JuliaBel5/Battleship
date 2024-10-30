@@ -1,68 +1,92 @@
+import { players, rooms, RoomUser, winners } from "../utils/dataBase";
+import { getPlayerName } from "../utils/getPlayerName";
 import { sendError } from "../utils/sendError";
+import { Winner } from "../utils/types";
 import { wsServer } from "../wsServer";
+import { WebSocket } from "ws";
 
-// Определяем интерфейсы для игроков и комнат
-interface Player {
-  name: string;
-  password: string;
-  wins: number;
-  ws: WebSocket;
-}
-
-interface RoomUser {
-  name: string;
-  index: number;
-}
-
-interface Room {
-  roomId: number;
-  roomUsers: RoomUser[];
-}
-
-interface Winner {
-  name: string;
-  wins: number;
-}
-
-// Инициализируем коллекции и переменные
-export const players = new Map<string, Player>();
-export const rooms = new Map<number, Room>();
 export let gameIdCounter = 0;
-export const winners: Winner[] = [];
 
-// Обработка регистрации игрока
 export function handleRegistration(
   ws: WebSocket,
   data: { name: string; password: string }
 ): void {
   const { name, password } = data;
+
   if (!name || !password) {
-    sendError(ws, "Name and password are required");
-    return;
-  }
-  if (players.has(name)) {
-    sendError(ws, "Player already exists");
-  } else {
-    players.set(name, { name, password, wins: 0, ws });
     ws.send(
       JSON.stringify({
         type: "reg",
-        data: JSON.stringify({ name, index: name, error: false }),
+        data: JSON.stringify({
+          name: "",
+          index: "",
+          error: true,
+          errorText: "Name and password are required",
+        }),
         id: 0,
       })
     );
-    sendWinnersList(ws);
-    updateRooms(ws);
+    return;
   }
+
+  if (players.has(name)) {
+    ws.send(
+      JSON.stringify({
+        type: "reg",
+        data: JSON.stringify({
+          name: "",
+          index: "",
+          error: true,
+          errorText: "Player already exists",
+        }),
+        id: 0,
+      })
+    );
+    return;
+  }
+
+  players.set(name, { name, password, wins: 0, ws });
+  ws.send(
+    JSON.stringify({
+      type: "reg",
+      data: JSON.stringify({
+        name,
+        index: name,
+        error: false,
+        errorText: "",
+      }),
+      id: 0,
+    })
+  );
+  console.log(`Player "${name}" registered successfully`);
+
+  sendWinnersList(ws);
+  console.log(`Winners list sent to player "${name}"`);
+
+  updateRooms(ws);
+  console.log(`Rooms list updated for player "${name}"`);
 }
 
-// Обработка создания комнаты
-export function handleCreateRoom(ws: WebSocket, name: string): void {
-  console.log(name, 123);
+export function handleCreateRoom(ws: WebSocket): void {
+  const name = getPlayerName(ws);
+
+  if (!name) {
+    sendError(ws, "Player not found");
+    return;
+  }
+
+  const currentRoom = Array.from(rooms.values()).find((room) =>
+    room.roomUsers.some((user) => user.name === name)
+  );
+
+  if (currentRoom) {
+    rooms.delete(currentRoom.roomId);
+  }
+
   const roomId = gameIdCounter++;
   const roomUsers: RoomUser[] = [{ name, index: 1 }];
   rooms.set(roomId, { roomId, roomUsers });
-
+  console.log(`Room created: Room ID = ${roomId}, Created by = ${name}`);
   updateRooms(ws);
 }
 
@@ -90,43 +114,51 @@ export function updateRooms(ws: WebSocket): void {
   broadcastToAllClients(updateRoomMessage);
 }
 
-// Обработка добавления пользователя в комнату
-export function handleAddUserToRoom(
-  ws: WebSocket,
-  indexRoom: number,
-  playerName: string
-): void {
-  console.log("функция вызвалась");
+export function handleAddUserToRoom(ws: WebSocket, indexRoom: number): void {
   if (!rooms.has(indexRoom)) {
-    console.log("error 1");
     sendError(ws, "Room does not exist");
     return;
   }
+
   if (typeof indexRoom === "undefined") {
-    console.log("error 2");
     sendError(ws, "Invalid data format for adding user to room");
     return;
   }
 
+  const playerName = getPlayerName(ws);
+  if (!playerName) {
+    sendError(ws, "Player not found");
+    return;
+  }
+
+  const currentRoom = Array.from(rooms.values()).find((room) =>
+    room.roomUsers.some((user) => user.name === playerName)
+  );
+
+  if (currentRoom) {
+    if (currentRoom.roomId === indexRoom) {
+      return;
+    } else {
+      rooms.delete(currentRoom.roomId);
+    }
+  }
+
   const room = rooms.get(indexRoom);
-  console.log(room, "room");
 
   if (room && room.roomUsers.length >= 2) {
     sendError(ws, "Room is already full");
     return;
   }
 
-  room?.roomUsers.push({ name: playerName, index: 2 });
-  console.log("here");
+  room?.roomUsers.push({ name: playerName, index: room.roomUsers.length + 1 });
+  console.log(
+    `User added to room: Player = ${playerName}, Room ID = ${indexRoom}`
+  );
   updateRooms(ws);
   startGame(indexRoom);
 }
 
-// Обновление списка победителей
-export function updateWinners(
-  ws: WebSocket,
-  winnerData: { name: string; wins: number }
-): void {
+export function updateWinners(winnerData: Winner): void {
   const { name, wins } = winnerData || {};
 
   if (name && wins) {
@@ -136,8 +168,6 @@ export function updateWinners(
     } else {
       winners.push({ name, wins: 1 });
     }
-
-    console.log(`Winner updated: ${name}`);
   }
   const updateWinnerMessage = JSON.stringify({
     type: "update_winners",
@@ -148,7 +178,6 @@ export function updateWinners(
   broadcastToAllClients(updateWinnerMessage);
 }
 
-// Запуск игры
 export function startGame(roomId: number): void {
   const idGame = roomId;
   const gamers = rooms.get(roomId)?.roomUsers;
@@ -158,7 +187,7 @@ export function startGame(roomId: number): void {
     return;
   }
 
-  gamers.forEach((gamer, index) => {
+  gamers.forEach((gamer, index: number) => {
     const playerName = gamer.name;
     const playerWs = players.get(playerName)?.ws;
 
@@ -173,12 +202,13 @@ export function startGame(roomId: number): void {
       data: JSON.stringify({ idGame, idPlayer: playerId }),
       id: 0,
     });
-
+    console.log(
+      `Game started in room: Room ID = ${roomId}, Game ID = ${idGame}`
+    );
     playerWs.send(startGameMessage);
   });
 }
 
-// Рассылка сообщений всем клиентам
 function broadcastToAllClients(data: string): void {
   const message = data;
 
